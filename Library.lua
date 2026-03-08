@@ -17,13 +17,13 @@ local Library = {
 }
 
 local function LoadFont()
-	local fontUrl = "https://raw.githubusercontent.com/llocalsskoi/g33t_lib/refs/heads/main/Monocraft-Bold.tff"
+	local fontUrl = "https://raw.githubusercontent.com/llocalsskoi/g33t_lib/refs/heads/main/Monocraft-Bold.ttf"
 	local fontId = nil
 
 	pcall(function()
 		local fontData = HttpService:GetAsync(fontUrl)
 		if not fontData then return end
-		local fontPath = "Monocraft-Bold.tff"
+		local fontPath = "Monocraft-Bold.ttf"
 		writefile(fontPath, fontData)
 
 		local fontFamilyData = HttpService:JSONEncode({
