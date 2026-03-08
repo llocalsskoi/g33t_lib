@@ -1,6 +1,8 @@
 local Input = game:GetService("UserInputService")
 local Tween = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+local ContentProvider = game:GetService("ContentProvider")
 
 local Library = {
 	Theme = {
@@ -13,6 +15,41 @@ local Library = {
 		Key = nil
 	}
 }
+
+local function LoadFont()
+	local fontUrl = "https://raw.githubusercontent.com/llocalsskoi/g33t_lib/refs/heads/main/Monocraft-Bold.tff"
+	local fontId = nil
+
+	pcall(function()
+		local fontData = HttpService:GetAsync(fontUrl)
+		if not fontData then return end
+		local fontPath = "Monocraft-Bold.tff"
+		writefile(fontPath, fontData)
+
+		local fontFamilyData = HttpService:JSONEncode({
+			name = "Monocraft Bold",
+			faces = {
+				{
+					name = "Regular",
+					weight = 700,
+					style = "normal",
+					assetId = "rbxasset://" .. fontPath
+				}
+			}
+		})
+
+		local familyPath = "Monocraft-Bold.json"
+		writefile(familyPath, fontFamilyData)
+	
+		Library.Theme.CustomFont = Font.new(
+			"rbxasset://" .. familyPath,
+			Enum.FontWeight.Bold,
+			Enum.FontStyle.Normal
+		)
+	end)
+end
+
+LoadFont()
 
 getfenv().Objects = {}
 
@@ -28,6 +65,16 @@ local function CreateObj(Class, Parametrs)
 	table.insert(getfenv().Objects, Obj)
 	for p,v in pairs(Parametrs) do Obj[p]=v end
 	return Obj
+end
+
+local function ApplyFont(obj)
+	if Library.Theme.CustomFont and obj:IsA("TextLabel") or
+	   Library.Theme.CustomFont and obj:IsA("TextButton") or
+	   Library.Theme.CustomFont and obj:IsA("TextBox") then
+		pcall(function()
+			obj.FontFace = Library.Theme.CustomFont
+		end)
+	end
 end
 
 local function MakeDraggable(frame, dragHandle)
@@ -65,7 +112,7 @@ local function MakeDraggable(frame, dragHandle)
 end
 
 function Library:CreateWindow(Parametrs)
-		if not Parametrs then return end
+	if not Parametrs then return end
 	if typeof(Parametrs["Name"]) ~= "string" then return end
 
 	local WindowFrame = CreateObj("Frame",{
@@ -115,6 +162,8 @@ function Library:CreateWindow(Parametrs)
 		TextXAlignment = Enum.TextXAlignment.Left
 	})
 
+	ApplyFont(TitleLabel)
+
 	local WindowOutline = CreateObj("Frame", {
 		Parent = WindowFrame,
 		Size = UDim2.new(1, -2, 1, -42),
@@ -157,7 +206,7 @@ function Library:CreateWindow(Parametrs)
 		BorderSizePixel = 0
 	})
 
-	MakeDraggable(WindowFrame,TitleFrame)
+	MakeDraggable(WindowFrame, TitleFrame)
 end
 
 function Library:Unload()
